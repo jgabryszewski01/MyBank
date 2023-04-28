@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
     FirebaseAuth auth;
     Button button;
-    TextView textView;
+    TextView userDetails, balance;
     FirebaseUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         button = findViewById(R.id.logout);
-        textView = findViewById(R.id.user_details);
+        balance = findViewById(R.id.balance);
+        userDetails = findViewById(R.id.user_details);
         user = auth.getCurrentUser();
         if (user == null){
             Intent intent = new Intent(getApplicationContext(), Login.class);
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
             finish();
         }
         else{
-            textView.setText(user.getEmail());
+            userDetails.setText(user.getEmail());
         }
 
         button.setOnClickListener(new View.OnClickListener() {
