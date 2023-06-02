@@ -53,16 +53,36 @@ public class AdditionalInfo extends AppCompatActivity {
             }
         });
     }
-    private void checkAccountNumberExists(DatabaseReference accountsRef, final String accountNumber) {
+    private void generateAccountNumber() {
+        DatabaseReference accountsRef = FirebaseDatabase.getInstance().getReference().child("Accounts");
+        String accountNumber;
+
+        Random random = new Random();
+        int randomNumber = random.nextInt(90000000) + 10000000;
+        accountNumber = String.valueOf(randomNumber);
+
+        checkAccountNumberExists(accountsRef, accountNumber, new OnAccountNumberCheckedListener() {
+            @Override
+            public void onAccountNumberChecked(boolean exists) {
+                if (exists) {
+                    Toast.makeText(AdditionalInfo.this, "Account number already exists.", Toast.LENGTH_SHORT).show();
+                } else {
+                    DatabaseReference userAccountRef = accountsRef.child(mAuth.getCurrentUser().getUid());
+                    DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("UsersInfo").child(mAuth.getUid());
+                    userAccountRef.child("accountNumber").setValue(accountNumber);
+                    userRef.child("accountNumber").setValue(accountNumber);
+                    addUserInfoToDB();
+                }
+            }
+        });
+    }
+
+    private void checkAccountNumberExists(DatabaseReference accountsRef, final String accountNumber, final OnAccountNumberCheckedListener listener) {
         accountsRef.orderByChild("accountNumber").equalTo(accountNumber).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    Toast.makeText(AdditionalInfo.this, "Account number already exists.", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(AdditionalInfo.this, "Account number is unique.", Toast.LENGTH_SHORT).show();
-                    addUserInfoToDB();
-                }
+                boolean exists = snapshot.exists();
+                listener.onAccountNumberChecked(exists);
             }
 
             @Override
@@ -72,15 +92,8 @@ public class AdditionalInfo extends AppCompatActivity {
         });
     }
 
-    private void generateAccountNumber() {
-        DatabaseReference accountsRef = FirebaseDatabase.getInstance().getReference().child("Accounts");
-        String accountNumber;
-
-        Random random = new Random();
-        int randomNumber = random.nextInt(90000000) + 10000000;
-        accountNumber = String.valueOf(randomNumber);
-
-        checkAccountNumberExists(accountsRef, accountNumber);
+    private interface OnAccountNumberCheckedListener {
+        void onAccountNumberChecked(boolean exists);
     }
     private void addUserInfoToDB(){
         String name, surname, phone, pesel, email;
