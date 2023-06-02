@@ -8,4 +8,7 @@
     <string name="click_to_register">Click to register</string>
     <string name="logout">Logout</string>
     <string name="add">Add</string>
+    <string name="transfer">Transfer</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
 </resources>
