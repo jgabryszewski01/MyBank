@@ -62,14 +62,12 @@ public class Register extends AppCompatActivity {
 
                 if(email.isEmpty()){
                     editTextEmail.setError("Enter email");
-                    return;
                 }
                 if(password.isEmpty()){
                     editTextPassword.setError("Enter password");
                 }
                 if (password.length() < 6){
                     Toast.makeText(Register.this, "Password too short", Toast.LENGTH_SHORT).show();
-                    return;
                 } else {
                     mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener( new OnCompleteListener<AuthResult>() {
                         @Override
