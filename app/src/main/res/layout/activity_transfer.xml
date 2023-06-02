@@ -30,13 +30,13 @@
         android:layout_height="wrap_content"/>
     <EditText
         android:id="@+id/receiver"
-        android:hint="Phone or account number"
+        android:hint="Account number"
         android:inputType="number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp" />
     <TextView
-        android:text="Transfer title:"
+        android:text="Title:"
         android:textSize="18sp"
         android:gravity="left"
         android:layout_marginLeft="10dp"
@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp" />
     <TextView
-        android:text="Transfer amount:"
+        android:text="Amount:"
         android:textSize="18sp"
         android:gravity="left"
         android:layout_marginLeft="10dp"

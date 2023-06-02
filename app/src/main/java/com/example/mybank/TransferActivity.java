@@ -63,18 +63,67 @@ public class TransferActivity extends AppCompatActivity {
         buttonConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String receiver = editReceiver.getText().toString();
                 String title = editTitle.getText().toString();
                 double amount = Double.parseDouble(editAmount.getText().toString());
                 String currentUserId = user.getUid();
-                final String[] senderAccountNumber = new String[1];
                 DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("Accounts");
 
                 usersRef.child(currentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if (snapshot.exists()){
-                            senderAccountNumber[0] = snapshot.child("accountNumber").getValue(String.class);
+                            String senderAccountNumber = snapshot.child("accountNumber").getValue(String.class);
+                            String receiverAccountNumber = editReceiver.getText().toString();
+                            Transfer transfer = new Transfer(senderAccountNumber, receiverAccountNumber, title, amount);
+
+                            String transferId = transfersRef.push().getKey();
+                            transfersRef.child(transferId).setValue(transfer);
+
+                            DatabaseReference senderAccountRef = usersRef.child(senderAccountNumber);
+                            senderAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.child("balance").exists()) {
+                                        String sBalance = snapshot.child("balance").getValue(String.class);
+                                        double senderBalance = Double.parseDouble(sBalance);
+                                        if(senderBalance >= amount){
+                                            double newSenderBalance = senderBalance - amount;
+                                            senderAccountRef.child("balance").setValue(newSenderBalance);
+
+                                            DatabaseReference receiverAccountRef = usersRef.child(receiverAccountNumber);
+                                            receiverAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                    if (snapshot.exists()){
+                                                        double receiverBalance = snapshot.child("balance").getValue(Double.class);
+                                                        double newReceiverBalance = receiverBalance + amount;
+                                                        receiverAccountRef.child("balance").setValue(newReceiverBalance);
+
+                                                        Intent intent = new Intent(getApplicationContext(), Transfer_completed.class);
+                                                        startActivity(intent);
+                                                        finish();
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError error) {
+                                                    Toast.makeText(TransferActivity.this, "Failed to read data", Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                        } else{
+                                            Toast.makeText(TransferActivity.this, "Insufficient balance", Toast.LENGTH_SHORT).show();
+                                        }
+                                    } else {
+                                        Toast.makeText(TransferActivity.this, "Balance field not found", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(TransferActivity.this, "Failed to read data", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }else {
                             Toast.makeText(TransferActivity.this, "User data not found", Toast.LENGTH_SHORT).show();
                         }
@@ -85,16 +134,12 @@ public class TransferActivity extends AppCompatActivity {
                     }
                 });
 
-                Transfer transfer = new Transfer(receiver, title, amount);
-
-                String transferId = transfersRef.push().getKey();
-                transfersRef.child(transferId).setValue(transfer);
-
 
             }
         });
     }
     public class Transfer {
+        private String sender;
         private String receiver;
         private String title;
         private double amount;
@@ -103,12 +148,20 @@ public class TransferActivity extends AppCompatActivity {
 
         }
 
-        public Transfer(String receiver, String title, double amount) {
-            this.receiver = receiver;
+        public Transfer(String senderAccountNumber, String receiverAccountNumber, String title, double amount) {
+            this.sender = senderAccountNumber;
+            this.receiver = receiverAccountNumber;
             this.title = title;
             this.amount = amount;
         }
 
+        public String getSender() {
+            return sender;
+        }
+
+        public void setSender(String sender) {
+            this.sender = sender;
+        }
         public String getReceiver() {
             return receiver;
         }

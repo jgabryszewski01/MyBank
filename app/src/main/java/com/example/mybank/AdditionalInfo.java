@@ -71,7 +71,7 @@ public class AdditionalInfo extends AppCompatActivity {
                     DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("UsersInfo").child(mAuth.getUid());
                     userAccountRef.child("accountNumber").setValue(accountNumber);
                     userRef.child("accountNumber").setValue(accountNumber);
-                    addUserInfoToDB();
+                    addUserInfoToDB(accountNumber);
                 }
             }
         });
@@ -95,21 +95,23 @@ public class AdditionalInfo extends AppCompatActivity {
     private interface OnAccountNumberCheckedListener {
         void onAccountNumberChecked(boolean exists);
     }
-    private void addUserInfoToDB(){
+    private void addUserInfoToDB(String accountNumber){
         String name, surname, phone, pesel, email;
         name = editTextName.getText().toString();
         surname = editTextSurname.getText().toString();
         email = mAuth.getCurrentUser().getEmail();
         phone = editTextPhone.getText().toString();
         pesel = editTextPESEL.getText().toString();
+        String balance = "500";
 
         Map<String, Object> userData = new HashMap<>();
         userData.put("name", name);
         userData.put("surname", surname);
         userData.put("email", email);
-        userData.put("balance", 0);
+        userData.put("balance", balance);
         userData.put("phone", phone);
         userData.put("PESEL", pesel);
+        userData.put("accountNumber", accountNumber);
 
         DatabaseReference userRef = mDB.getInstance().getReference().child("UsersInfo").child(mAuth.getUid());
         userRef.setValue(userData);
