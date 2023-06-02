@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDB;
-    private Button button;
+    private Button buttonLogout, buttonTransfer;
     private TextView userDetails, balance;
     private FirebaseUser user;
 
@@ -69,7 +69,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
-        button = findViewById(R.id.logout);
+        buttonLogout = findViewById(R.id.logout);
+        buttonTransfer = findViewById(R.id.Transfer);
         balance = findViewById(R.id.balance);
         userDetails = findViewById(R.id.user_details);
         user = mAuth.getCurrentUser();
@@ -96,11 +97,19 @@ public class MainActivity extends AppCompatActivity {
         });
         userDetails.setText(user.getEmail());
 
-        button.setOnClickListener(new View.OnClickListener() {
+        buttonLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FirebaseAuth.getInstance().signOut();
                 Intent intent = new Intent(getApplicationContext(), Login.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        buttonTransfer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), TransferActivity.class);
                 startActivity(intent);
                 finish();
             }
