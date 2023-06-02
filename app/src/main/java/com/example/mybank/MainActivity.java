@@ -31,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser == null){
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            startActivity(intent);
+            finish();
+        }
         String Uid;
         mAuth = FirebaseAuth.getInstance();
         Uid = mAuth.getCurrentUser().getUid();
@@ -42,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 String DBEmail = snapshot.getValue(String.class);
                 user = mAuth.getCurrentUser();
                 String AuthEmail = user.getEmail();
-                if(!DBEmail.equals(AuthEmail)){
+                if(DBEmail == null || !DBEmail.equals(AuthEmail)){
                     Intent intent = new Intent(getApplicationContext(), AdditionalInfo.class);
                     startActivity(intent);
                     finish();
@@ -67,14 +73,28 @@ public class MainActivity extends AppCompatActivity {
         balance = findViewById(R.id.balance);
         userDetails = findViewById(R.id.user_details);
         user = mAuth.getCurrentUser();
-        if (user == null){
-            Intent intent = new Intent(getApplicationContext(), Login.class);
-            startActivity(intent);
-            finish();
-        }
-        else{
-            userDetails.setText(user.getEmail());
-        }
+        final
+        String Uid = mAuth.getCurrentUser().getUid();
+        DatabaseReference userInfoRef = FirebaseDatabase.getInstance().getReference().child("UsersInfo").child(Uid);
+
+        userInfoRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    String name = snapshot.child("name").getValue(String.class);
+                    String surname = snapshot.child("surname").getValue(String.class);
+                    double balanceValue = snapshot.child("balance").getValue(Double.class);
+                    userDetails.setText("Hello, " + name + " " + surname);
+                    balance.setText("Account balance: " + String.format("%.2f", balanceValue));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, "Failed to read user data.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        userDetails.setText(user.getEmail());
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
