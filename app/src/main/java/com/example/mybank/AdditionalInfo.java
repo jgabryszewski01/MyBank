@@ -32,7 +32,16 @@ public class AdditionalInfo extends AppCompatActivity {
     private EditText editTextName, editTextSurname, editTextPhone, editTextPESEL;
     FirebaseAuth mAuth;
 
-
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser == null){
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            startActivity(intent);
+            finish();
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,7 +111,7 @@ public class AdditionalInfo extends AppCompatActivity {
         email = mAuth.getCurrentUser().getEmail();
         phone = editTextPhone.getText().toString();
         pesel = editTextPESEL.getText().toString();
-        String balance = "500";
+        double balance = 150;
 
         Map<String, Object> userData = new HashMap<>();
         userData.put("name", name);

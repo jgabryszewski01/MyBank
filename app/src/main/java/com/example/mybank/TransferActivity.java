@@ -16,6 +16,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 public class TransferActivity extends AppCompatActivity {
@@ -66,7 +67,7 @@ public class TransferActivity extends AppCompatActivity {
                 String title = editTitle.getText().toString();
                 double amount = Double.parseDouble(editAmount.getText().toString());
                 String currentUserId = user.getUid();
-                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("Accounts");
+                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("UsersInfo");
 
                 usersRef.child(currentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -79,29 +80,40 @@ public class TransferActivity extends AppCompatActivity {
                             String transferId = transfersRef.push().getKey();
                             transfersRef.child(transferId).setValue(transfer);
 
-                            DatabaseReference senderAccountRef = usersRef.child(senderAccountNumber);
+                            DatabaseReference senderAccountRef = usersRef.child(currentUserId);
                             senderAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     if (snapshot.child("balance").exists()) {
-                                        String sBalance = snapshot.child("balance").getValue(String.class);
-                                        double senderBalance = Double.parseDouble(sBalance);
+                                        double senderBalance = snapshot.child("balance").getValue(Double.class);
                                         if(senderBalance >= amount){
                                             double newSenderBalance = senderBalance - amount;
                                             senderAccountRef.child("balance").setValue(newSenderBalance);
 
-                                            DatabaseReference receiverAccountRef = usersRef.child(receiverAccountNumber);
-                                            receiverAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            Query query = usersRef.orderByChild("accountNumber").equalTo(receiverAccountNumber);
+                                            query.addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                    if (snapshot.exists()){
-                                                        double receiverBalance = snapshot.child("balance").getValue(Double.class);
-                                                        double newReceiverBalance = receiverBalance + amount;
-                                                        receiverAccountRef.child("balance").setValue(newReceiverBalance);
+                                                    for (DataSnapshot userSnapshot : snapshot.getChildren()){
+                                                        String receiverID = userSnapshot.getKey();
+                                                        DatabaseReference receiverAccountRef = usersRef.child(receiverID);
+                                                        receiverAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                double receiverBalance = snapshot.child("balance").getValue(Double.class);
+                                                                double newReceiverBalance = receiverBalance + amount;
+                                                                receiverAccountRef.child("balance").setValue(newReceiverBalance);
 
-                                                        Intent intent = new Intent(getApplicationContext(), Transfer_completed.class);
-                                                        startActivity(intent);
-                                                        finish();
+                                                                Intent intent = new Intent(getApplicationContext(), Transfer_completed.class);
+                                                                startActivity(intent);
+                                                                finish();
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                                            }
+                                                        });
                                                     }
                                                 }
 

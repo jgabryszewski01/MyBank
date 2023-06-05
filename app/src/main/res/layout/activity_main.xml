@@ -20,7 +20,14 @@
         android:id="@+id/balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24dp"/>
+        android:textSize="24dp"
+        android:layout_marginBottom="30dp"/>
+
+    <TextView
+        android:id="@+id/accountNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="22dp"/>
 
     <Button
         android:text="@string/transfer"
