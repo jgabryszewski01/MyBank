@@ -62,12 +62,15 @@ public class Register extends AppCompatActivity {
 
                 if(email.isEmpty()){
                     editTextEmail.setError("Enter email");
+                    progressBar.setVisibility(View.GONE);
                 }
                 if(password.isEmpty()){
                     editTextPassword.setError("Enter password");
+                    progressBar.setVisibility(View.GONE);
                 }
                 if (password.length() < 6){
                     Toast.makeText(Register.this, "Password too short", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
                 } else {
                     mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener( new OnCompleteListener<AuthResult>() {
                         @Override
@@ -80,9 +83,17 @@ public class Register extends AppCompatActivity {
                                         if (task.isSuccessful()){
                                             Toast.makeText(Register.this, "Account created. Please verify your email.",
                                                     Toast.LENGTH_SHORT).show();
-                                            Intent intent = new Intent(getApplicationContext(), Login.class);
-                                            startActivity(intent);
-                                            finish();
+                                            if (!mAuth.getCurrentUser().isEmailVerified()){
+                                                FirebaseAuth.getInstance().signOut();
+                                                Intent intent = new Intent(getApplicationContext(), Login.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                            else {
+                                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
                                         }
                                         else{
                                             Toast.makeText(Register.this, "Please verify your email.",
