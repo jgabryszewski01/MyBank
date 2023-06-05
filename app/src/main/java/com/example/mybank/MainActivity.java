@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDB;
     private Button buttonLogout, buttonTransfer;
-    private TextView userDetails, balance;
+    private TextView userDetails, balance, accountNum;
     private FirebaseUser user;
 
     @Override
@@ -73,8 +73,9 @@ public class MainActivity extends AppCompatActivity {
         buttonTransfer = findViewById(R.id.Transfer);
         balance = findViewById(R.id.balance);
         userDetails = findViewById(R.id.user_details);
+        accountNum = findViewById(R.id.accountNumber);
         user = mAuth.getCurrentUser();
-        final
+
         String Uid = mAuth.getCurrentUser().getUid();
         DatabaseReference userInfoRef = FirebaseDatabase.getInstance().getReference().child("UsersInfo").child(Uid);
 
@@ -84,9 +85,11 @@ public class MainActivity extends AppCompatActivity {
                 if (snapshot.exists()){
                     String name = snapshot.child("name").getValue(String.class);
                     String surname = snapshot.child("surname").getValue(String.class);
+                    String acNumber = snapshot.child("accountNumber").getValue(String.class);
                     double balanceValue = snapshot.child("balance").getValue(Double.class);
                     userDetails.setText("Hello, " + name + " " + surname);
                     balance.setText("Account balance: " + String.format("%.2f", balanceValue));
+                    accountNum.setText("Your account number: " + acNumber);
                 }
             }
 

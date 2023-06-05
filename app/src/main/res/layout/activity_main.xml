@@ -12,22 +12,35 @@
         android:id="@+id/user_details"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:layout_marginBottom="30dp"
+        android:textSize="24dp"/>
 
     <TextView
         android:id="@+id/balance"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textSize="24dp"
+        android:layout_marginBottom="30dp"/>
+
+    <TextView
+        android:id="@+id/accountNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="22dp"/>
 
     <Button
         android:text="@string/transfer"
         android:id="@+id/Transfer"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:textSize="22dp"/>
     <Button
         android:text="@string/logout"
         android:id="@+id/logout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textSize="22dp"/>
 
 </LinearLayout>
