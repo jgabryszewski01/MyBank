@@ -32,7 +32,10 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser == null){
+        if(currentUser == null || !mAuth.getCurrentUser().isEmailVerified()){
+            if (!mAuth.getCurrentUser().isEmailVerified()){
+                FirebaseAuth.getInstance().signOut();
+            }
             Intent intent = new Intent(getApplicationContext(), Login.class);
             startActivity(intent);
             finish();
@@ -98,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Failed to read user data.", Toast.LENGTH_SHORT).show();
             }
         });
-        userDetails.setText(user.getEmail());
 
         buttonLogout.setOnClickListener(new View.OnClickListener() {
             @Override

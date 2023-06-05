@@ -75,46 +75,55 @@ public class TransferActivity extends AppCompatActivity {
                         if (snapshot.exists()){
                             String senderAccountNumber = snapshot.child("accountNumber").getValue(String.class);
                             String receiverAccountNumber = editReceiver.getText().toString();
-                            Transfer transfer = new Transfer(senderAccountNumber, receiverAccountNumber, title, amount);
 
-                            String transferId = transfersRef.push().getKey();
-                            transfersRef.child(transferId).setValue(transfer);
+                            Query query = usersRef.orderByChild("accountNumber").equalTo(receiverAccountNumber);
 
-                            DatabaseReference senderAccountRef = usersRef.child(currentUserId);
-                            senderAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            query.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    if (snapshot.child("balance").exists()) {
-                                        double senderBalance = snapshot.child("balance").getValue(Double.class);
-                                        if(senderBalance >= amount){
-                                            double newSenderBalance = senderBalance - amount;
-                                            senderAccountRef.child("balance").setValue(newSenderBalance);
+                                    for (DataSnapshot userSnapshot : snapshot.getChildren()){
 
-                                            Query query = usersRef.orderByChild("accountNumber").equalTo(receiverAccountNumber);
-                                            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        if (!userSnapshot.getKey().isEmpty()&&amount>0){
+                                            Transfer transfer = new Transfer(senderAccountNumber, receiverAccountNumber, title, amount);
+
+                                            DatabaseReference senderAccountRef = usersRef.child(currentUserId);
+                                            senderAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                    for (DataSnapshot userSnapshot : snapshot.getChildren()){
-                                                        String receiverID = userSnapshot.getKey();
-                                                        DatabaseReference receiverAccountRef = usersRef.child(receiverID);
-                                                        receiverAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                            @Override
-                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                                double receiverBalance = snapshot.child("balance").getValue(Double.class);
-                                                                double newReceiverBalance = receiverBalance + amount;
-                                                                receiverAccountRef.child("balance").setValue(newReceiverBalance);
+                                                    if (snapshot.child("balance").exists()) {
+                                                        double senderBalance = snapshot.child("balance").getValue(Double.class);
+                                                        if(senderBalance >= amount){
+                                                            double newSenderBalance = senderBalance - amount;
+                                                            senderAccountRef.child("balance").setValue(newSenderBalance);
 
-                                                                Intent intent = new Intent(getApplicationContext(), Transfer_completed.class);
-                                                                startActivity(intent);
-                                                                finish();
-                                                            }
+                                                            String receiverID = userSnapshot.getKey();
+                                                            DatabaseReference receiverAccountRef = usersRef.child(receiverID);
+                                                            receiverAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                @Override
+                                                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                    double receiverBalance = snapshot.child("balance").getValue(Double.class);
+                                                                    double newReceiverBalance = receiverBalance + amount;
+                                                                    receiverAccountRef.child("balance").setValue(newReceiverBalance);
+                                                                    String transferId = transfersRef.push().getKey();
+                                                                    transfersRef.child(transferId).setValue(transfer);
 
-                                                            @Override
-                                                            public void onCancelled(@NonNull DatabaseError error) {
+                                                                    Intent intent = new Intent(getApplicationContext(), Transfer_completed.class);
+                                                                    startActivity(intent);
+                                                                    finish();
+                                                                }
 
-                                                            }
-                                                        });
+                                                                @Override
+                                                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                                                }
+                                                            });
+                                                        } else{
+                                                            Toast.makeText(TransferActivity.this, "Insufficient balance", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    } else {
+                                                        Toast.makeText(TransferActivity.this, "Balance field not found", Toast.LENGTH_SHORT).show();
                                                     }
+
                                                 }
 
                                                 @Override
@@ -123,12 +132,9 @@ public class TransferActivity extends AppCompatActivity {
                                                 }
                                             });
                                         } else{
-                                            Toast.makeText(TransferActivity.this, "Insufficient balance", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(TransferActivity.this, "Wrong amount", Toast.LENGTH_SHORT).show();
                                         }
-                                    } else {
-                                        Toast.makeText(TransferActivity.this, "Balance field not found", Toast.LENGTH_SHORT).show();
                                     }
-
                                 }
 
                                 @Override
@@ -136,7 +142,10 @@ public class TransferActivity extends AppCompatActivity {
                                     Toast.makeText(TransferActivity.this, "Failed to read data", Toast.LENGTH_SHORT).show();
                                 }
                             });
-                        }else {
+
+
+                            }
+                            else {
                             Toast.makeText(TransferActivity.this, "User data not found", Toast.LENGTH_SHORT).show();
                         }
                     }
