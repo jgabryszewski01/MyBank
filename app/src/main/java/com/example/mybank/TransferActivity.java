@@ -19,6 +19,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class TransferActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -84,7 +87,11 @@ public class TransferActivity extends AppCompatActivity {
                                     for (DataSnapshot userSnapshot : snapshot.getChildren()){
 
                                         if (!userSnapshot.getKey().isEmpty()&&amount>0){
-                                            Transfer transfer = new Transfer(senderAccountNumber, receiverAccountNumber, title, amount);
+                                            Date date = new Date();
+                                            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+                                            String transferDate = formatter.format(date);
+
+                                            Transfer transfer = new Transfer(senderAccountNumber, receiverAccountNumber, title, amount, transferDate);
 
                                             DatabaseReference senderAccountRef = usersRef.child(currentUserId);
                                             senderAccountRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -164,16 +171,20 @@ public class TransferActivity extends AppCompatActivity {
         private String receiver;
         private String title;
         private double amount;
+        private String date;
+
+
 
         public Transfer() {
 
         }
 
-        public Transfer(String senderAccountNumber, String receiverAccountNumber, String title, double amount) {
+        public Transfer(String senderAccountNumber, String receiverAccountNumber, String title, double amount, String transferDate) {
             this.sender = senderAccountNumber;
             this.receiver = receiverAccountNumber;
             this.title = title;
             this.amount = amount;
+            this.date = transferDate;
         }
 
         public String getSender() {
@@ -205,6 +216,13 @@ public class TransferActivity extends AppCompatActivity {
 
         public void setAmount(double amount) {
             this.amount = amount;
+        }
+        public String getDate() {
+            return date;
+        }
+
+        public void setDate(String date) {
+            this.date = date;
         }
     }
 
