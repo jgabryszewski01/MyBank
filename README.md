@@ -21,3 +21,5 @@ MIT License
 The MyBank project is written in Java using Android Studio enviroment.
 
 The main functionality of the project is the ability to make balance transfers between users with user and transfer data stored in Firebase Realtime Database.
+
+https://www.youtube.com/watch?v=pzK8ChjTpso
