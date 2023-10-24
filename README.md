@@ -3,8 +3,8 @@
 A simplistic android app designed to simulate banking applications
 
 ### Copyright
-#### Authors
-Jakub Gabryszewski, Mikołaj Orzoł
+#### Author
+Jakub Gabryszewski
 #### License
 MIT License
 
